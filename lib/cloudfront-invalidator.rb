@@ -9,7 +9,10 @@ class CloudfrontInvalidator
   end
   
   def invalidate(*keys)
-    keys.flatten!
+    keys.flatten!.map! do |k| 
+      k.start_with?('/') ? k : '/' + k 
+    end
+    
     uri = URI.parse "https://cloudfront.amazonaws.com/2010-11-01/distribution/#{@cf_dist_id}/invalidation"
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
