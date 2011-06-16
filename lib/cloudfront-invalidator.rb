@@ -9,7 +9,7 @@ class CloudfrontInvalidator
   end
   
   def invalidate(*keys)
-    keys.flatten!.map! do |k| 
+    keys = keys.flatten.map do |k| 
       k.start_with?('/') ? k : '/' + k 
     end
     
