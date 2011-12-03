@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+begin
+  require '../lib/cloudfront-invalidator'
+rescue LoadError
+  require 'rubygems'
+  require 'cloudfront-invalidator'
+end
+
+unless ARGV.length >= 4
+  warn "Usage: cloudfront-invalidator (invalidate|list|list_detail) aws_key aws_secret distribution_id [path ...]"
+  exit 1
+end
+
+verb            = ARGV.shift
+raise "Verb must be invalidate, list, or list_detail" unless %w{invalidate list list_detail}.include? verb
+aws_key         = ARGV.shift
+aws_secret      = ARGV.shift
+distribution_id = ARGV.shift
+paths = ARGV
+
+invalidator = CloudfrontInvalidator.new(aws_key, aws_secret, distribution_id)
+case verb
+when 'invalidate'
+  invalidator.invalidate(paths)
+when 'list'
+  invalidator.list
+when 'list_detail'
+  invalidator.list_detail
+end
