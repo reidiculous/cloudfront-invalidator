@@ -57,6 +57,10 @@ class CloudfrontInvalidator
     end
   end
   
+  def list_detail
+    list(true)
+  end
+  
   def get_invalidation_detail_xml(invalidation_id)
     uri = URI.parse "#{@BASE_URL}#{@cf_dist_id}/invalidation/#{invalidation_id}"
     http = Net::HTTP.new(uri.host, uri.port)
