@@ -1,10 +1,10 @@
-# All these libraries are in the Ruby standard library; no gems needed
 require 'net/https'
 require 'base64'
-require 'hmac-sha1'
 require 'rexml/document'
+require 'hmac-sha1' # this is a gem
 
 class CloudfrontInvalidator  
+
   def initialize(aws_key, aws_secret, cf_dist_id)
     @aws_key, @aws_secret, @cf_dist_id = aws_key, aws_secret, cf_dist_id
     
