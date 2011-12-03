@@ -9,6 +9,10 @@ Gem::Specification.new do |s|
   s.rubyforge_project = s.name
 
   s.add_dependency('ruby-hmac')
-  s.files             = ['lib/cloudfront-invalidator.rb']
+  s.files             = ['lib/cloudfront-invalidator.rb', 'README.md', 'bin/cloudfront-invalidator']
   s.require_path      = 'lib'
+  
+  s.bindir = "bin"
+  s.executables = ["cloudfront-invalidator"]
+  s.default_executable = "cloudfront-invalidator"
 end
