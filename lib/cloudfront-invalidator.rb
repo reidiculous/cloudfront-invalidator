@@ -75,7 +75,7 @@ class CloudfrontInvalidator
 <?xml version="1.0" encoding="UTF-8"?>
   <InvalidationBatch>
     #{keys.map{|k| "<Path>#{k}</Path>" }.join("\n    ")}
-    <CallerReference>CloudfrontInvalidator at #{Time.now}</CallerReference>"
+    <CallerReference>CloudfrontInvalidator at #{Time.now.strftime("%m/%d/%Y - %H:%M:%S")}</CallerReference>"
   </InvalidationBatch>
 XML
   end
