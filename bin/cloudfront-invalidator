@@ -22,7 +22,10 @@ paths = ARGV
 invalidator = CloudfrontInvalidator.new(aws_key, aws_secret, distribution_id)
 case verb
 when 'invalidate'
-  invalidator.invalidate(paths)
+  print "Invalidating #{paths.size} objects"
+  invalidator.invalidate(paths) do |status,time|
+    print status == "Complete" ? "\nComplete after < #{time.to_f.ceil} seconds.\n" : "."
+  end
 when 'list'
   invalidator.list
 when 'list_detail'
