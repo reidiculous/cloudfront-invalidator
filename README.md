@@ -16,3 +16,9 @@ A command line utility is also included.
     $ cloudfront-invalidator invalidate $AWS_KEY $AWS_SECRET $DISTRIBUTION_ID index.html favicon.ico
     $ cloudfront-invalidator list $AWS_KEY $AWS_SECRET $DISTRIBUTION_ID
     $ cloudfront-invalidator list_detail $AWS_KEY $AWS_SECRET $DISTRIBUTION_ID
+
+Authors
+=======
+
+* Reid M Lynch
+* Jacob Elder
