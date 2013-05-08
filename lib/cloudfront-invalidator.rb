@@ -4,22 +4,29 @@ require 'rexml/document'
 require 'hmac-sha1' # this is a gem
 
 class CloudfrontInvalidator  
-  API_VERSION = '2012-05-05'
-  BASE_URL = "https://cloudfront.amazonaws.com/#{API_VERSION}/distribution/"
-  DOC_URL = "http://cloudfront.amazonaws.com/doc/#{API_VERSION}/"
   BACKOFF_LIMIT = 8192
   BACKOFF_DELAY = 0.025
 
-  def initialize(aws_key, aws_secret, cf_dist_id)
+  def initialize(aws_key, aws_secret, cf_dist_id, options={})
     @aws_key, @aws_secret, @cf_dist_id = aws_key, aws_secret, cf_dist_id
+
+    @api_version = options[:api_version] || '2012-07-01'
   end
-  
+
+  def base_url
+    "https://cloudfront.amazonaws.com/#{@api_version}/distribution/"
+  end
+
+  def doc_url
+    "http://cloudfront.amazonaws.com/doc/#{@api_version}/"
+  end
+
   def invalidate(*keys)
     keys = keys.flatten.map do |k| 
       k.start_with?('/') ? k : '/' + k 
     end
     
-    uri = URI.parse "#{BASE_URL}#{@cf_dist_id}/invalidation"
+    uri = URI.parse "#{base_url}#{@cf_dist_id}/invalidation"
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -69,7 +76,7 @@ class CloudfrontInvalidator
   end
 
   def list(show_detail = false)
-    uri = URI.parse "#{BASE_URL}#{@cf_dist_id}/invalidation"
+    uri = URI.parse "#{base_url}#{@cf_dist_id}/invalidation"
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -104,7 +111,7 @@ class CloudfrontInvalidator
   end
 
   def get_invalidation_detail_xml(invalidation_id)
-    uri = URI.parse "#{BASE_URL}#{@cf_dist_id}/invalidation/#{invalidation_id}"
+    uri = URI.parse "#{base_url}#{@cf_dist_id}/invalidation/#{invalidation_id}"
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -115,7 +122,7 @@ class CloudfrontInvalidator
   def xml_body(keys)
     xml = <<XML
 <?xml version="1.0" encoding="UTF-8"?>
-<InvalidationBatch xmlns="#{DOC_URL}">
+<InvalidationBatch xmlns="#{doc_url}">
   <Paths>
     <Quantity>#{keys.size}</Quantity>
     <Items>
