@@ -135,7 +135,7 @@ XML
   end
   
   def headers
-    date = Time.now.strftime('%a, %d %b %Y %H:%M:%S %Z')
+    date = Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S %Z')
     digest = HMAC::SHA1.new(@aws_secret)
     digest << date
     signature = Base64.encode64(digest.digest)
