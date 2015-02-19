@@ -3,7 +3,7 @@ require 'base64'
 require 'rexml/document'
 require 'hmac-sha1' # this is a gem
 
-class CloudfrontInvalidator  
+class CloudfrontInvalidator
   BACKOFF_LIMIT = 8192
   BACKOFF_DELAY = 0.025
 
@@ -22,10 +22,10 @@ class CloudfrontInvalidator
   end
 
   def invalidate(*keys)
-    keys = keys.flatten.map do |k| 
-      k.start_with?('/') ? k : '/' + k 
+    keys = keys.flatten.map do |k|
+      k.start_with?('/') ? k : '/' + k
     end
-    
+
     uri = URI.parse "#{base_url}#{@cf_dist_id}/invalidation"
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -36,18 +36,18 @@ class CloudfrontInvalidator
     begin
       resp = http.send_request 'POST', uri.path, body, headers
       doc = REXML::Document.new resp.body
-   
+
       # Create and raise an exception for any error the API returns to us.
       if resp.code.to_i != 201
         error_code = doc.elements["ErrorResponse/Error/Code"].text
         self.class.const_set(error_code,Class.new(StandardError)) unless self.class.const_defined?(error_code.to_sym)
         raise self.class.const_get(error_code).new(doc.elements["ErrorResponse/Error/Message"].text)
       end
-    
+
     # Handle the common case of too many in progress by waiting until the others finish.
     rescue TooManyInvalidationsInProgress => e
       sleep delay * BACKOFF_DELAY
-      delay *= 2 unless delay >= BACKOFF_LIMIT 
+      delay *= 2 unless delay >= BACKOFF_LIMIT
       STDERR.puts e.inspect
       retry
     end
@@ -83,9 +83,9 @@ class CloudfrontInvalidator
     resp = http.send_request 'GET', uri.path, '', headers
 
     doc = REXML::Document.new resp.body
-    puts "MaxItems " + doc.elements["InvalidationList/MaxItems"].text + "; " + (doc.elements["InvalidationList/MaxItems"].text == "true" ? "truncated" : "not truncated")
+    puts "MaxItems " + doc.elements["InvalidationList/MaxItems"].text + "; " + (doc.elements["InvalidationList/IsTruncated"].text == "true" ? "truncated" : "not truncated")
 
-    doc.each_element("/InvalidationList/InvalidationSummary") do |summary|
+    doc.each_element("/InvalidationList/Items/InvalidationSummary") do |summary|
       invalidation_id = summary.elements["Id"].text
       summary_text = "ID " + invalidation_id + ": " + summary.elements["Status"].text
 
@@ -98,8 +98,8 @@ class CloudfrontInvalidator
              detail_doc.elements["Invalidation/InvalidationBatch/CallerReference"].text +
              '"'
         puts '  Invalidated URL paths:'
-        
-        puts "    " + detail_doc.elements.to_a('Invalidation/InvalidationBatch/Path').map { |path| path.text }.join(" ")
+
+        puts "    " + detail_doc.elements.to_a("Invalidation/InvalidationBatch/Paths/Items/Path").map(&:text).join(" ")
       else
         puts summary_text
       end
@@ -133,7 +133,7 @@ class CloudfrontInvalidator
 </InvalidationBatch>
 XML
   end
-  
+
   def headers
     date = Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S %Z')
     digest = HMAC::SHA1.new(@aws_secret)
