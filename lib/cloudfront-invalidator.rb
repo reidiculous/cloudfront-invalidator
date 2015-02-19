@@ -99,7 +99,7 @@ class CloudfrontInvalidator
              '"'
         puts '  Invalidated URL paths:'
 
-        puts "    " + detail_doc.elements.to_a("Invalidation/InvalidationBatch/Paths/Items").map { |item| item.elements["Path"].text }.join(" ")
+        puts "    " + detail_doc.elements.to_a("Invalidation/InvalidationBatch/Paths/Items/Path").map(&:text).join(" ")
       else
         puts summary_text
       end
