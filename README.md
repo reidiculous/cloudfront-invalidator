@@ -17,6 +17,24 @@ A command line utility is also included.
     $ cloudfront-invalidator list $AWS_KEY $AWS_SECRET $DISTRIBUTION_ID
     $ cloudfront-invalidator list_detail $AWS_KEY $AWS_SECRET $DISTRIBUTION_ID
 
+Amazon IAM Policy
+=================
+
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": [
+            "cloudfront:CreateInvalidation",
+            "cloudfront:GetInvalidation",
+            "cloudfront:ListInvalidations"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }
+      ]
+    }
+
 Authors
 =======
 
