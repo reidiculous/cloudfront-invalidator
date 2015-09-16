@@ -81,9 +81,10 @@ class CloudfrontInvalidator
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     resp = http.send_request 'GET', uri.path, '', headers
+    details = []
 
     doc = REXML::Document.new resp.body
-    puts "MaxItems " + doc.elements["InvalidationList/MaxItems"].text + "; " + (doc.elements["InvalidationList/IsTruncated"].text == "true" ? "truncated" : "not truncated")
+    details << "MaxItems " + doc.elements["InvalidationList/MaxItems"].text + "; " + (doc.elements["InvalidationList/IsTruncated"].text == "true" ? "truncated" : "not truncated")
 
     doc.each_element("/InvalidationList/Items/InvalidationSummary") do |summary|
       invalidation_id = summary.elements["Id"].text
@@ -91,19 +92,20 @@ class CloudfrontInvalidator
 
       if show_detail
         detail_doc = REXML::Document.new get_invalidation_detail_xml(invalidation_id)
-        puts summary_text +
+        details << summary_text +
              "; Created at: " +
              detail_doc.elements["Invalidation/CreateTime"].text +
              '; Caller reference: "' +
              detail_doc.elements["Invalidation/InvalidationBatch/CallerReference"].text +
              '"'
-        puts '  Invalidated URL paths:'
+        details << '  Invalidated URL paths:'
 
-        puts "    " + detail_doc.elements.to_a("Invalidation/InvalidationBatch/Paths/Items/Path").map(&:text).join(" ")
+        details << "    " + detail_doc.elements.to_a("Invalidation/InvalidationBatch/Paths/Items/Path").map(&:text).join(" ")
       else
-        puts summary_text
+        details << summary_text
       end
     end
+    details
   end
 
   def list_detail
