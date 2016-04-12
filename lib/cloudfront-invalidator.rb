@@ -1,7 +1,7 @@
 require 'net/https'
 require 'base64'
+require 'openssl'
 require 'rexml/document'
-require 'hmac-sha1' # this is a gem
 
 class CloudfrontInvalidator
   BACKOFF_LIMIT = 8192
@@ -138,9 +138,11 @@ XML
 
   def headers
     date = Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S %Z')
-    digest = HMAC::SHA1.new(@aws_secret)
-    digest << date
-    signature = Base64.encode64(digest.digest)
+    signature = Base64.encode64(OpenSSL::HMAC.digest(
+      OpenSSL::Digest.new('sha1'),
+      @aws_secret,
+      date
+    )).strip
     {'Date' =>  date, 'Authorization' => "AWS #{@aws_key}:#{signature}"}
   end
 
